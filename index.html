@@ -19,14 +19,14 @@
 </head>
 <body>
 
-    <h1>我的網頁作品集</h1>
+    <h1>上課網站們</h1>
     <div id="project-list" class="grid">
         </div>
 
     <script>
         async function fetchMyProjects() {
             // 重要：請將 '你的使用者名稱' 替換成你真正的 GitHub 帳號
-            const username = 'marypingu213'; 
+            const username = 'marypingu213-code'; 
             const response = await fetch(`https://api.github.com/users/${username}/repos`);
             const repos = await response.json();
             const container = document.getElementById('project-list');
