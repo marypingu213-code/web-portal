@@ -3,47 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的作品集展示</title>
+    <title>我的互動遊戲大廳</title>
     <style>
-        /* 簡單的卡片佈局樣式 */
-        body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { 
-            background: white; border: 1px solid #ddd; padding: 20px; 
-            border-radius: 10px; text-decoration: none; color: #333;
-            transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        body { 
+            font-family: "Microsoft JhengHei", sans-serif; 
+            padding: 40px 20px; 
+            background-color: #fff9f0; /* 溫暖的背景色 */
+            color: #444;
         }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        h1 { text-align: center; }
+        h1 { text-align: center; color: #ff8c00; font-size: 2.5em; margin-bottom: 40px; }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 25px; 
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card { 
+            display: block;
+            padding: 30px 20px; 
+            border-radius: 20px; 
+            text-decoration: none; 
+            color: #333;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid white;
+        }
+
+        .card:hover { 
+            transform: scale(1.05) rotate(2deg); /* 懸停時會輕微放大旋轉，像跳舞一樣 */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .emoji { font-size: 3em; display: block; margin-bottom: 10px; }
+        .card h3 { margin: 10px 0; font-size: 1.5em; color: #222; }
+        .card p { font-size: 1em; color: #666; }
     </style>
 </head>
 <body>
 
-    <h1>上課網站們</h1>
+    <h1>🐾 我的互動教學大廳 🐾</h1>
     <div id="project-list" class="grid">
         </div>
 
     <script>
+        const animals = ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🦁', '🐮', '🐷', '🐸', '🐙'];
+        const colors = ['#FFD1DC', '#FFECB3', '#C8E6C9', '#B3E5FC', '#D1C4E9', '#F8BBD0', '#E1BEE7', '#CFD8DC'];
+
         async function fetchMyProjects() {
-            // 重要：請將 '你的使用者名稱' 替換成你真正的 GitHub 帳號
             const username = 'marypingu213-code'; 
             const response = await fetch(`https://api.github.com/users/${username}/repos`);
             const repos = await response.json();
             const container = document.getElementById('project-list');
             
-            repos.forEach(repo => {
-                // 判斷條件：只抓取有開啟 GitHub Pages 功能的專案
-                if (repo.has_pages) { 
+            repos.forEach((repo, index) => {
+                // 過濾：只抓取開啟 GitHub Pages 的專案，且排除掉「入口站」本身
+                // (假設你的入口站 Repo 名稱叫 'marypingu213-code.github.io')
+                if (repo.has_pages && repo.name !== 'marypingu213-code.github.io') { 
                     const link = `https://${username}.github.io/${repo.name}`;
                     
-                    // 建立顯示卡片
+                    // 隨機選一個動物和顏色
+                    const randomEmoji = animals[Math.floor(Math.random() * animals.length)];
+                    const randomColor = colors[index % colors.length]; // 依序分配顏色，確保看起來繽紛
+
                     const card = document.createElement('a');
                     card.href = link;
                     card.className = 'card';
-                    card.target = '_blank'; // 在新分頁開啟
+                    card.target = '_blank';
+                    card.style.backgroundColor = randomColor; // 套用隨機顏色
+                    
                     card.innerHTML = `
+                        <span class="emoji">${randomEmoji}</span>
                         <h3>${repo.name}</h3>
-                        <p>${repo.description || '點擊進入網頁查看更多內容'}</p>
+                        <p>${repo.description || '點擊開始學習吧！'}</p>
                     `;
                     
                     container.appendChild(card);
@@ -51,7 +86,6 @@
             });
         }
 
-        // 啟動抓取功能
         fetchMyProjects();
     </script>
 </body>
