@@ -7,11 +7,26 @@
     <style>
         body { 
             font-family: "Microsoft JhengHei", sans-serif; 
-            padding: 40px 20px; 
-            background-color: #fff9f0; /* 溫暖的背景色 */
+            padding: 20px; 
+            background-color: #fff9f0; 
             color: #444;
+            text-align: center;
         }
-        h1 { text-align: center; color: #ff8c00; font-size: 2.5em; margin-bottom: 40px; }
+        
+        /* 時光布告欄樣式 */
+        #clock-container {
+            background-color: #ffffff;
+            border: 3px dashed #ffb74d;
+            border-radius: 15px;
+            display: inline-block;
+            padding: 15px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        #date-display { font-size: 1.2rem; color: #666; margin-bottom: 5px; }
+        #time-display { font-size: 2.5rem; color: #ff8c00; font-weight: bold; }
+
+        h1 { color: #ff8c00; font-size: 2.2em; margin-bottom: 30px; }
         
         .grid { 
             display: grid; 
@@ -27,7 +42,6 @@
             border-radius: 20px; 
             text-decoration: none; 
             color: #333;
-            text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: 3px solid white;
@@ -39,18 +53,34 @@
         }
 
         .emoji { font-size: 3em; display: block; margin-bottom: 10px; }
-        .card h3 { margin: 10px 0; font-size: 1.5em; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .card h3 { margin: 10px 0; font-size: 1.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .card p { font-size: 1em; color: #666; }
     </style>
 </head>
 <body>
 
+    <div id="clock-container">
+        <div id="date-display">載入日期中...</div>
+        <div id="time-display">00:00:00</div>
+    </div>
+
     <h1>🐾 我的互動教學大廳 🐾</h1>
+    
     <div id="project-list" class="grid">
         </div>
 
     <script>
-        // 這裡已經放入你的 Canva 連結
+        // 更新時間的函式
+        function updateClock() {
+            const now = new Date();
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('date-display').innerText = now.toLocaleDateString('zh-TW', dateOptions);
+            document.getElementById('time-display').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 外部課程清單
         const externalProjects = [
             {
                 name: 'Canva 互動課程',
@@ -67,46 +97,37 @@
             const username = 'marypingu213-code'; 
             const container = document.getElementById('project-list');
             
-            // 1. 先顯示 Canva 課程
+            // 1. 顯示 Canva 課程
             externalProjects.forEach((item, index) => {
                 const randomColor = colors[index % colors.length];
-                const card = createCard(item.name, item.description, item.url, item.emoji, randomColor);
-                container.appendChild(card);
+                container.appendChild(createCard(item.name, item.description, item.url, item.emoji, randomColor));
             });
 
-            // 2. 再自動抓取 GitHub 的專案
+            // 2. 抓取 GitHub 專案
             try {
                 const response = await fetch(`https://api.github.com/users/${username}/repos`);
                 const repos = await response.json();
                 
                 repos.forEach((repo, index) => {
-                    // 排除掉入口網站本身，只顯示有網頁功能的專案
                     if (repo.has_pages && !repo.name.includes('.github.io')) { 
                         const link = `https://${username}.github.io/${repo.name}`;
                         const randomEmoji = animals[Math.floor(Math.random() * animals.length)];
                         const colorIndex = (index + externalProjects.length) % colors.length;
-                        
-                        const card = createCard(repo.name, '點擊開始學習吧！', link, randomEmoji, colors[colorIndex]);
-                        container.appendChild(card);
+                        container.appendChild(createCard(repo.name, '點擊開始學習吧！', link, randomEmoji, colors[colorIndex]));
                     }
                 });
             } catch (error) {
-                console.error('無法抓取 GitHub 專案:', error);
+                console.error('抓取失敗:', error);
             }
         }
 
-        // 建立卡片的工具函式
         function createCard(title, desc, link, emoji, color) {
             const card = document.createElement('a');
             card.href = link;
             card.className = 'card';
             card.target = '_blank';
             card.style.backgroundColor = color;
-            card.innerHTML = `
-                <span class="emoji">${emoji}</span>
-                <h3>${title}</h3>
-                <p>${desc}</p>
-            `;
+            card.innerHTML = `<span class="emoji">${emoji}</span><h3>${title}</h3><p>${desc}</p>`;
             return card;
         }
 
