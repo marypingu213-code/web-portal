@@ -5,69 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的互動遊戲大廳</title>
     <style>
+        /* 使用圓潤的字體，減少視覺壓力 */
         body { 
-            font-family: "Microsoft JhengHei", sans-serif; 
+            font-family: "jf-open-huninn", "Microsoft JhengHei", sans-serif; 
             padding: 20px; 
             background-color: #fff9f0; 
             color: #444;
             text-align: center;
         }
         
+        /* 音樂切換按鈕 */
+        #music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ffb74d;
+            border: none;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            font-size: 26px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        #music-control:hover { transform: scale(1.1); }
+
+        /* 時光布告欄 */
         #clock-container {
             background-color: #ffffff;
             border: 3px dashed #ffb74d;
-            border-radius: 15px;
+            border-radius: 20px;
             display: inline-block;
-            padding: 15px 30px;
-            margin-bottom: 10px;
+            padding: 15px 40px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
-        #date-display { font-size: 1.2rem; color: #666; margin-bottom: 5px; }
-        #time-display { font-size: 2.5rem; color: #ff8c00; font-weight: bold; }
+        #date-display { font-size: 1.3rem; color: #666; margin-bottom: 5px; }
+        #time-display { font-size: 2.8rem; color: #ff8c00; font-weight: bold; }
 
+        /* 隨機鼓勵語 */
         #encouragement-text {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: #e67e22;
             font-weight: bold;
-            margin-bottom: 30px;
-            min-height: 1.6em;
+            margin-bottom: 40px;
+            min-height: 1.8em;
+            text-shadow: 1px 1px 0px white;
         }
 
-        h1 { color: #ff8c00; font-size: 2.2em; margin-bottom: 30px; }
+        h1 { color: #ff8c00; font-size: 2.5em; margin-bottom: 30px; letter-spacing: 2px; }
         
+        /* 遊戲卡片佈局 */
         .grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 25px; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 30px; 
             max-width: 1200px;
             margin: 0 auto;
         }
 
         .card { 
             display: block;
-            padding: 30px 20px; 
-            border-radius: 20px; 
+            background: white;
+            border-radius: 25px; 
             text-decoration: none; 
             color: #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 3px solid white;
+            border: 4px solid white;
+            overflow: hidden;
+            position: relative;
         }
 
         .card:hover { 
-            transform: scale(1.05) rotate(2deg); 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: scale(1.05) rotate(1.5deg); 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
         }
 
-        .emoji { font-size: 3em; display: block; margin-bottom: 10px; }
-        .card h3 { margin: 10px 0; font-size: 1.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .card p { font-size: 1em; color: #666; }
+        /* 預覽圖區域 */
+        .card-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5em;
+        }
+
+        .card-content { padding: 25px 20px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 1.5em; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .card p { font-size: 1.05em; color: #777; margin: 0; line-height: 1.4; }
+
+        /* 響應式調整 */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; }
+            #time-display { font-size: 2.2rem; }
+        }
     </style>
 </head>
 <body>
 
+    <button id="music-control" onclick="toggleMusic()" title="切換背景音樂">🎵</button>
+    <audio id="bg-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="clock-container">
-        <div id="date-display">載入日期中...</div>
+        <div id="date-display">正在確認日期...</div>
         <div id="time-display">00:00:00</div>
     </div>
 
@@ -75,84 +126,128 @@
 
     <h1>🐾 我的互動教學大廳 🐾</h1>
     
-    <div id="project-list" class="grid"></div>
+    <div id="project-list" class="grid">
+        </div>
 
     <script>
-        const magicPhrases = [
-            "✨ 今天的你，也會有超棒的表現喔！",
-            "🐰 阿白和土土也在幫你加油打氣喔！", // 這裡有妳可愛的兔子們
-            "🌟 每一次的練習，都是在讓自己變得更強大！",
-            "🌈 準備好跟同學一起探索新的知識了嗎？",
-            "💪 加油！你是最棒的學習小超人！",
-            "🎨 今天的學習，就像畫畫一樣繽紛有趣！",
-            "🍎 喝口水、伸個懶腰，我們一起開始吧！",
-            "🐢 慢慢來，比較快，我們一起穩穩地前進！"
-        ];
+        // 1. 音樂播放控制
+        const music = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-control');
+        function toggleMusic() {
+            if (music.paused) {
+                music.play();
+                musicBtn.innerText = '⏸️';
+            } else {
+                music.pause();
+                musicBtn.innerText = '🎵';
+            }
+        }
 
+        // 2. 時鐘與日期更新
         function updateClock() {
             const now = new Date();
             const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             document.getElementById('date-display').innerText = now.toLocaleDateString('zh-TW', dateOptions);
             document.getElementById('time-display').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
         }
-        
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 3. 隨機鼓勵語 (包含阿白、土土與浣熊)
+        const magicPhrases = [
+            "✨ 今天的你，也會有超棒的表現喔！",
+            "🐰 阿白和土土也在幫你加油打氣喔！",
+            "🌟 每一次的練習，都是在讓自己變得更強大！",
+            "🌈 準備好跟浣熊一起探索新的知識了嗎？",
+            "💪 加油！你是最棒的學習小超人！",
+            "🎨 今天的學習，就像畫畫一樣繽紛有趣！",
+            "🍎 喝口水、伸個懶腰，我們一起開始吧！",
+            "🐢 慢慢來，比較快，我們一起穩穩地前進！"
+        ];
         function showRandomPhrase() {
             const phraseElement = document.getElementById('encouragement-text');
             const randomIndex = Math.floor(Math.random() * magicPhrases.length);
             phraseElement.innerText = magicPhrases[randomIndex];
         }
-
-        setInterval(updateClock, 1000);
-        updateClock();
         showRandomPhrase();
 
+        // 4. 外部課程清單 (Canva & Classkick)
         const externalProjects = [
             {
                 name: 'Canva 互動課程',
                 description: '點擊開始 Canva 教學練習',
                 url: 'https://www.canva.com/design/DAG-uatWjDI/LxRBHSKEZGycu1bAeAM8tQ/view?utm_content=DAG-uatWjDI&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h928823834f',
                 emoji: '🎨'
+            },
+            {
+                name: 'Classkick 課中練習',
+                description: '進入 Classkick 完成今天的練習題吧！',
+                url: '這裡貼上妳的Classkick分派連結', 
+                emoji: '📝'
             }
         ];
 
         const animals = ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🦁', '🐮', '🐷', '🐸', '🐙'];
         const colors = ['#FFD1DC', '#FFECB3', '#C8E6C9', '#B3E5FC', '#D1C4E9', '#F8BBD0', '#E1BEE7', '#CFD8DC'];
 
+        // 5. 抓取 GitHub 專案並生成卡片
         async function fetchMyProjects() {
             const username = 'marypingu213-code'; 
             const container = document.getElementById('project-list');
             
+            // 渲染外部專案
             externalProjects.forEach((item, index) => {
-                container.appendChild(createCard(item.name, item.description, item.url, item.emoji, colors[index % colors.length]));
+                const color = colors[index % colors.length];
+                container.appendChild(createCard(item.name, item.description, item.url, item.emoji, color, ''));
             });
 
+            // 渲染 GitHub 專案
             try {
                 const response = await fetch(`https://api.github.com/users/${username}/repos`);
                 const repos = await response.json();
                 
                 repos.forEach((repo, index) => {
-                    // --- 這裡已經更新過濾條件：web-portal ---
+                    // 排除大廳專案本身
                     const isPortal = repo.name === 'web-portal' || repo.name === 'marypingu213-code.github.io';
                     
                     if (repo.has_pages && !isPortal) { 
                         const link = `https://${username}.github.io/${repo.name}`;
                         const randomEmoji = animals[Math.floor(Math.random() * animals.length)];
                         const colorIndex = (index + externalProjects.length) % colors.length;
-                        container.appendChild(createCard(repo.name, '點擊開始學習吧！', link, randomEmoji, colors[colorIndex]));
+                        
+                        // 自動生成 GitHub 預覽圖連結
+                        const previewImg = `https://opengraph.githubassets.com/1/${username}/${repo.name}`;
+                        
+                        container.appendChild(createCard(repo.repo_name_pretty || repo.name, '點擊開始學習吧！', link, randomEmoji, colors[colorIndex], previewImg));
                     }
                 });
             } catch (error) {
-                console.error('抓取失敗:', error);
+                console.error('資料抓取失敗:', error);
             }
         }
 
-        function createCard(title, desc, link, emoji, color) {
+        // 6. 建立卡片的輔助函式
+        function createCard(title, desc, link, emoji, color, imgSrc) {
             const card = document.createElement('a');
             card.href = link;
             card.className = 'card';
             card.target = '_blank';
-            card.style.backgroundColor = color;
-            card.innerHTML = `<span class="emoji">${emoji}</span><h3>${title}</h3><p>${desc}</p>`;
+            
+            // 處理圖片載入失敗的情況 (自動切換回 Emoji)
+            const mediaHtml = imgSrc 
+                ? `<img src="${imgSrc}" class="card-image" alt="${title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                : '';
+            
+            const emojiHtml = `<div class="card-image" style="background-color: ${color}">${emoji}</div>`;
+
+            card.innerHTML = `
+                ${mediaHtml}
+                ${imgSrc ? emojiHtml.replace('display:flex', 'display:none') : emojiHtml}
+                <div class="card-content">
+                    <h3>${title}</h3>
+                    <p>${desc}</p>
+                </div>
+            `;
             return card;
         }
 
