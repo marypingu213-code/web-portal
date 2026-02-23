@@ -112,19 +112,19 @@
         }
         showRandomPhrase();
 
-        // 3. 外部課程清單
+        // 3. 外部課程清單：Canva 使用 🎨，Classkick 使用 📝 (維持原樣)
         const externalProjects = [
             {
                 name: 'Canva 互動課程',
                 description: '點擊開始 Canva 教學練習',
                 url: 'https://www.canva.com/design/DAG-uatWjDI/LxRBHSKEZGycu1bAeAM8tQ/view?utm_content=DAG-uatWjDI&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h928823834f',
-                emoji: '🎨' // Canva 專屬圖案
+                emoji: '🎨'
             },
             {
                 name: 'Classkick 課中練習',
                 description: '進入 Classkick 完成今天的練習題吧！',
                 url: '這裡貼上妳的Classkick分派連結', 
-                emoji: '📋' // Classkick 專屬圖案
+                emoji: '📝'
             }
         ];
 
@@ -152,11 +152,13 @@
                     
                     if (repo.has_pages && !isPortal) { 
                         const link = `https://${username}.github.io/${repo.name}`;
-                        let baseEmoji = animals[Math.floor(Math.random() * animals.length)];
+                        let baseEmoji;
                         
-                        // 針對特定網頁加上鑽石 💎
+                        // 修正：特定網頁「只顯示鑽石」，其餘 GitHub 專案「隨機動物」
                         if (repo.name === 'grade-3-web' || repo.name === 'RICHMAN3') {
-                            baseEmoji = '💎' + baseEmoji;
+                            baseEmoji = '💎';
+                        } else {
+                            baseEmoji = animals[Math.floor(Math.random() * animals.length)];
                         }
                         
                         const colorIndex = (index + externalProjects.length) % colors.length;
