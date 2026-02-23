@@ -112,7 +112,7 @@
         }
         showRandomPhrase();
 
-        // 3. 外部課程清單：Canva 使用 🎨，Classkick 使用 📝 (維持原樣)
+        // 3. 外部課程清單：維持 Canva=🎨, Classkick=📝
         const externalProjects = [
             {
                 name: 'Canva 互動課程',
@@ -154,7 +154,7 @@
                         const link = `https://${username}.github.io/${repo.name}`;
                         let baseEmoji;
                         
-                        // 修正：特定網頁「只顯示鑽石」，其餘 GitHub 專案「隨機動物」
+                        // RICHMAN3 與 grade-3-web 專屬設定：只顯示鑽石
                         if (repo.name === 'grade-3-web' || repo.name === 'RICHMAN3') {
                             baseEmoji = '💎';
                         } else {
@@ -170,7 +170,7 @@
             }
         }
 
-        // 5. 建立純色卡片函式
+        // 5. 建立卡片輔助函式
         function createCard(title, desc, link, emoji, color) {
             const card = document.createElement('a');
             card.href = link;
@@ -185,7 +185,7 @@
             return card;
         }
 
-        fetchMyProjects();
-    </script>
-</body>
+            fetchMyProjects();
+        </script>
+    </body>
 </html>
