@@ -6,7 +6,7 @@
     <title>我的互動遊戲大廳</title>
     <style>
         body { 
-            font-family: "Microsoft JhengHei", sans-serif; 
+            font-family: "jf-open-huninn", "Microsoft JhengHei", sans-serif; 
             padding: 20px; 
             background-color: #fff9f0; 
             color: #444;
@@ -30,7 +30,7 @@
             margin-bottom: 40px;
             min-height: 1.8em;
         }
-        h1 { color: #ff8c00; font-size: 2.5em; margin-bottom: 30px; }
+        h1 { color: #ff8c00; font-size: 2.2em; margin-bottom: 30px; }
         .grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
@@ -45,18 +45,19 @@
             text-decoration: none; 
             color: #333;
             box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
+            transition: all 0.3s;
             border: 4px solid white;
             text-align: center;
         }
-        .card:hover { transform: scale(1.05); }
+        .card:hover { transform: scale(1.05) rotate(2deg); }
         .emoji { font-size: 4.5em; display: block; margin-bottom: 15px; }
+        .card h3 { margin: 10px 0; font-size: 1.5em; color: #222; }
     </style>
 </head>
 <body>
 
     <div id="clock-container">
-        <div id="date-display">正在載入...</div>
+        <div id="date-display">正在確認日期...</div>
         <div id="time-display">00:00:00</div>
     </div>
 
@@ -67,7 +68,7 @@
     <div id="project-list" class="grid"></div>
 
     <script>
-        // 1. 時間功能
+        // 1. 時間與隨機語
         function updateClock() {
             const now = new Date();
             document.getElementById('date-display').innerText = now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
@@ -76,52 +77,38 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // 2. 隨機鼓勵語
-        const magicPhrases = ["✨ 今天的你，也會有超棒的表現喔！", "🐰 阿白和土土幫你加油！", "💪 你是最棒的學習小超人！"];
-        document.getElementById('encouragement-text').innerText = magicPhrases[Math.floor(Math.random() * magicPhrases.length)];
+        const phrases = ["✨ 今天的你，也會有超棒的表現喔！", "🐰 阿白和土土幫你加油！", "💪 你是最棒的學習小超人！"];
+        document.getElementById('encouragement-text').innerText = phrases[Math.floor(Math.random() * phrases.length)];
 
-        // 3. 核心資料與渲染
+        // 2. 這裡「直接寫死」妳所有的連結，不依賴網路抓取！
         const username = 'marypingu213-code';
-        const colors = ['#FFD1DC', '#FFECB3', '#C8E6C9', '#B3E5FC', '#D1C4E9', '#F8BBD0'];
-        const animals = ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼'];
-
-        const externalProjects = [
-            { name: 'Canva 互動課程', url: 'https://www.canva.com/design/DAHEekV3BTA/mgY6zKK6trtbWczso0EFkw/view', emoji: '🎨' },
-            { name: 'Classkick 課中練習', url: 'https://www.canva.com/design/DAHEekV3BTA/km7Bk5KLnTGW3h9eyK16aw/edit', emoji: '📝' }
+        const myProjects = [
+            // 外部連結
+            { name: 'Canva 互動課程', emoji: '💎', url: 'https://www.canva.com/design/DAG-uatWjDI/LxRBHSKEZGycu1bAeAM8tQ/view', color: '#FFD1DC' },
+            { name: 'Classkick 課中練習', emoji: '💎', url: 'https://www.canva.com/design/DAHEekV3BTA/km7Bk5KLnTGW3h9eyK16aw/edit', color: '#FFECB3' },
+            
+            // GitHub 專案 (手動填入名稱)
+            { name: 'grade-3-web', emoji: '💎', color: '#C8E6C9' },
+            { name: 'RICHMAN3', emoji: '💎', color: '#B3E5FC' },
+            { name: 'G3-diamond', emoji: '🐰', color: '#D1C4E9' },
+            { name: 'G5-diamond', emoji: '🐼', color: '#F8BBD0' },
+            { name: 'vacab-3', emoji: '🦊', color: '#E1BEE7' }
         ];
 
-        function createCard(title, link, emoji, color) {
+        const container = document.getElementById('project-list');
+        
+        myProjects.forEach(p => {
             const card = document.createElement('a');
-            card.href = link;
+            // 如果沒給 url，就自動生成 GitHub Pages 連結
+            const finalUrl = p.url || `https://${username}.github.io/${p.name}/`;
+            
+            card.href = finalUrl;
             card.className = 'card';
             card.target = '_blank';
-            card.style.backgroundColor = color;
-            card.innerHTML = `<span class="emoji">${emoji}</span><h3>${title}</h3><p>點擊開始學習</p>`;
-            return card;
-        }
-
-        async function init() {
-            const container = document.getElementById('project-list');
-            // 先放外部連結
-            externalProjects.forEach((p, i) => container.appendChild(createCard(p.name, p.url, p.emoji, colors[i % colors.length])));
-
-            // 再抓 GitHub
-            try {
-                const res = await fetch(`https://api.github.com/users/${username}/repos?sort=updated`);
-                const repos = await res.json();
-                repos.forEach((repo, i) => {
-                    const isPortal = repo.name.includes('portal') || repo.name.includes('github.io');
-                    if (!isPortal) {
-                        const emoji = (repo.name === 'grade-3-web' || repo.name === 'RICHMAN3') ? '💎' : animals[i % animals.length];
-                        container.appendChild(createCard(repo.name, `https://${username}.github.io/${repo.name}/`, emoji, colors[(i + 2) % colors.length]));
-                    }
-                });
-            } catch (e) {
-                console.log("GitHub 抓取稍有延遲，請重新整理");
-            }
-        }
-
-        init();
+            card.style.backgroundColor = p.color;
+            card.innerHTML = `<span class="emoji">${p.emoji}</span><h3>${p.name}</h3><p>點擊開始學習</p>`;
+            container.appendChild(card);
+        });
     </script>
 </body>
 </html>
