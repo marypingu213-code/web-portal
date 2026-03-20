@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的互動遊戲大廳</title>
     <style>
+        /* 使用圓潤的粉圓體字型，對學生更具親和力 */
         body { 
             font-family: "jf-open-huninn", "Microsoft JhengHei", sans-serif; 
             padding: 20px; 
@@ -12,6 +13,8 @@
             color: #444;
             text-align: center;
         }
+        
+        /* 時光布告欄 */
         #clock-container {
             background-color: #ffffff;
             border: 3px dashed #ffb74d;
@@ -23,6 +26,8 @@
         }
         #date-display { font-size: 1.3rem; color: #666; margin-bottom: 5px; }
         #time-display { font-size: 2.8rem; color: #ff8c00; font-weight: bold; }
+
+        /* 隨機鼓勵語區塊 */
         #encouragement-text {
             font-size: 1.6rem;
             color: #e67e22;
@@ -30,7 +35,10 @@
             margin-bottom: 40px;
             min-height: 1.8em;
         }
+
         h1 { color: #ff8c00; font-size: 2.5em; margin-bottom: 30px; letter-spacing: 2px; }
+        
+        /* 卡片佈局：純色背景風格 */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
@@ -38,6 +46,7 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
         .card { 
             display: block;
             padding: 40px 20px; 
@@ -49,10 +58,12 @@
             border: 4px solid white;
             text-align: center;
         }
+
         .card:hover { 
             transform: scale(1.05) rotate(2deg); 
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+
         .emoji { font-size: 4.5em; display: block; margin-bottom: 15px; }
         .card h3 { margin: 10px 0; font-size: 1.5em; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .card p { font-size: 1.05em; color: #666; margin: 0; line-height: 1.4; }
@@ -72,6 +83,7 @@
     <div id="project-list" class="grid"></div>
 
     <script>
+        // 1. 更新日期與時間
         function updateClock() {
             const now = new Date();
             const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
@@ -81,20 +93,25 @@
         setInterval(updateClock, 1000);
         updateClock();
 
+        // 2. 隨機鼓勵語清單
         const magicPhrases = [
             "✨ 今天的你，也會有超棒的表現喔！",
             "🐰 阿白和土土也在幫你加油打氣喔！", 
             "🌟 每一次的練習，都是在讓自己變得更強大！",
+            "🌈 準備好跟浣熊一起探索新的知識了嗎？", 
             "💪 加油！你是最棒的學習小超人！",
+            "🎨 今天的學習，就像畫畫一樣繽紛有趣！",
             "🍎 喝口水、伸個懶腰，我們一起開始吧！",
             "🐢 慢慢來，比較快，我們一起穩穩地前進！"
         ];
         function showRandomPhrase() {
             const phraseElement = document.getElementById('encouragement-text');
-            phraseElement.innerText = magicPhrases[Math.floor(Math.random() * magicPhrases.length)];
+            const randomIndex = Math.floor(Math.random() * magicPhrases.length);
+            phraseElement.innerText = magicPhrases[randomIndex];
         }
         showRandomPhrase();
 
+        // 3. 外部課程清單
         const externalProjects = [
             {
                 name: 'Canva 互動課程',
@@ -113,18 +130,23 @@
         const animals = ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🦁', '🐮', '🐷', '🐸', '🐙'];
         const colors = ['#FFD1DC', '#FFECB3', '#C8E6C9', '#B3E5FC', '#D1C4E9', '#F8BBD0', '#E1BEE7', '#CFD8DC'];
 
+        // 4. 自動抓取 GitHub 專案
         async function fetchMyProjects() {
             const username = 'marypingu213-code'; 
             const container = document.getElementById('project-list');
             
-            // 渲染手動加入的外部連結
+            // 清空容器（防止重複載入）
+            container.innerHTML = '';
+
+            // 先渲染外部課程
             externalProjects.forEach((item, index) => {
                 const color = colors[index % colors.length];
                 container.appendChild(createCard(item.name, item.description, item.url, item.emoji, color));
             });
 
-            // 抓取 GitHub 專案
+            // 抓取 GitHub 上的專案
             try {
+                // 使用更強大的 API 請求，確保能抓到所有專案
                 const response = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`);
                 const repos = await response.json();
                 
@@ -133,11 +155,12 @@
                     // 排除大廳本身
                     const isPortal = repo.name === 'web-portal' || repo.name === 'marypingu213-code.github.io' || repo.name === 'diamond-portal';
                     
-                    // 只要有 Pages 功能或者專案名稱不是 Portal，我們就嘗試顯示它
+                    // 判斷是否為 Pages 或者該專案不是 Portal
                     if (!isPortal && repo.name !== username) { 
                         const link = `https://${username}.github.io/${repo.name}/`;
                         let baseEmoji;
                         
+                        // RICHMAN3 與 grade-3-web 專屬設定：只顯示鑽石
                         if (repo.name === 'grade-3-web' || repo.name === 'RICHMAN3') {
                             baseEmoji = '💎';
                         } else {
@@ -154,13 +177,18 @@
             }
         }
 
+        // 5. 建立卡片輔助函式
         function createCard(title, desc, link, emoji, color) {
             const card = document.createElement('a');
             card.href = link;
             card.className = 'card';
             card.target = '_blank';
             card.style.backgroundColor = color;
-            card.innerHTML = `<span class="emoji">${emoji}</span><h3>${title}</h3><p>${desc}</p>`;
+            card.innerHTML = `
+                <span class="emoji">${emoji}</span>
+                <h3>${title}</h3>
+                <p>${desc}</p>
+            `;
             return card;
         }
 
